@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const pengaduanController = require('./controllers/pengaduanController');
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -12,6 +13,7 @@ connectDB();
 // Middleware (Kriteria Backend)
 app.use(cors());
 app.use(express.json()); // Supaya express bisa membaca req.body berupa JSON
+app.use("/api/auth", authRoutes);
 
 // Pemetaan Routing REST API Langsung sesuai spesifikasi minimum:
 app.post('/api/data', (req, res) => pengaduanController.createPengaduan(req, res));
