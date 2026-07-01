@@ -1,3 +1,5 @@
+import {FaCheckCircle,FaClock,FaSpinner,} from "react-icons/fa";
+
 const PengaduanTable = ({ data, onEdit, onDelete }) => {
     return (
       <div className="bg-white rounded-lg shadow p-5 overflow-x-auto">
@@ -29,10 +31,23 @@ const PengaduanTable = ({ data, onEdit, onDelete }) => {
                   </td>
   
                   <td className="p-3">
-                    <span className="px-2 py-1 rounded bg-yellow-200">
-                      {item.status}
+                    <span
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-white text-sm font-medium
+                        ${
+                            item.status === "Pending"
+                            ? "bg-yellow-500"
+                            : item.status === "Proses"
+                            ? "bg-blue-500"
+                            : "bg-green-500"
+                        }`}
+                    >
+                        {item.status === "Pending" && <FaClock />}
+                        {item.status === "Proses" && <FaSpinner />}
+                        {item.status === "Selesai" && <FaCheckCircle />}
+
+                        {item.status}
                     </span>
-                  </td>
+                    </td>
   
                   <td className="p-3">
                     {new Date(item.createdAt).toLocaleDateString()}

@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
 import MainLayout from "../../layouts/MainLayout";
-
 import PengaduanForm from "../../components/pengaduan/PengaduanForm";
-
 import { createPengaduan } from "../../services/pengaduanService";
-
 import api from "../../services/api";
 
 const TambahPengaduan = () => {
@@ -29,12 +26,18 @@ const TambahPengaduan = () => {
 
     }, []);
 
-    const handleSubmit = async (data) => {
-
-        await createPengaduan(data);
-
-        navigate("/pengaduan");
-
+    const handleSubmit = async (formData) => {
+        try {
+            await createPengaduan(formData);
+    
+            toast.success("Pengaduan berhasil ditambahkan");
+    
+            navigate("/pengaduan");
+        } catch (err) {
+            console.log(err);
+    
+            toast.error("Gagal menambahkan pengaduan");
+        }
     };
 
     return (

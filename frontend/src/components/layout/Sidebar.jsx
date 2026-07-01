@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import {
   FaHome,
@@ -9,6 +9,8 @@ import {
 } from "react-icons/fa";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   const menu = [
     {
       name: "Dashboard",
@@ -32,47 +34,51 @@ const Sidebar = () => {
     },
   ];
 
-  return (
-    <aside className="w-64 bg-white shadow min-h-screen">
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
-      <div className="p-5 font-bold text-blue-600 text-lg border-b">
-        MENU
+  return (
+    <aside className="w-64 bg-white shadow min-h-screen flex flex-col">
+
+      {/* Logo */}
+      <div className="p-5 font-bold text-blue-600 text-xl border-b">
+        SIP Sekolah
       </div>
 
-      <ul>
+      {/* Menu */}
+      <ul className="flex-1">
 
         {menu.map((item) => (
           <li key={item.name}>
-
             <NavLink
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-5 py-4 hover:bg-blue-100 ${
+                `flex items-center gap-3 px-5 py-4 transition-all duration-200 ${
                   isActive
                     ? "bg-blue-600 text-white"
-                    : "text-gray-700"
+                    : "text-gray-700 hover:bg-blue-100"
                 }`
               }
             >
               {item.icon}
-              {item.name}
+              <span>{item.name}</span>
             </NavLink>
-
           </li>
         ))}
 
       </ul>
 
-      <div className="absolute bottom-0 w-64">
-
-        <button className="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-100">
-
+      {/* Logout */}
+      <div className="border-t">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-100"
+        >
           <FaSignOutAlt />
-
           Logout
-
         </button>
-
       </div>
 
     </aside>

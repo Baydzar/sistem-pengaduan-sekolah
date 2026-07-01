@@ -5,6 +5,9 @@ import ProtectedRoute from "../components/common/ProtectedRoute";
 import Pengaduan from "../pages/pengaduan/Pengaduan";
 import TambahPengaduan from "../pages/pengaduan/TambahPengaduan";
 import EditPengaduan from "../pages/pengaduan/EditPengaduan";
+import Kategori from "../pages/kategori/Kategori";
+import TambahKategori from "../pages/kategori/TambahKategori";
+import EditKategori from "../pages/kategori/EditKategori";
 
 const AppRoutes = () => {
   return (
@@ -57,6 +60,34 @@ const AppRoutes = () => {
 
       {/* Jika URL tidak ditemukan */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      
+        {/* Kategori */}
+        <Route
+        path="/kategori"
+        element={
+            <ProtectedRoute>
+            <Kategori />
+            </ProtectedRoute>
+        }
+        />
+
+        <Route
+        path="/kategori/tambah"
+        element={
+            <ProtectedRoute>
+            <TambahKategori />
+            </ProtectedRoute>
+        }
+        />
+
+        <Route
+        path="/kategori/edit/:id"
+        element={
+            <ProtectedRoute>
+            <EditKategori />
+            </ProtectedRoute>
+        }
+        />
     </Routes>
   );
 };

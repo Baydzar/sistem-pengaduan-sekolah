@@ -1,17 +1,10 @@
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-
 import MainLayout from "../../layouts/MainLayout";
-
 import PengaduanForm from "../../components/pengaduan/PengaduanForm";
-
 import api from "../../services/api";
-
-import {
-    getPengaduan,
-    updatePengaduan,
-} from "../../services/pengaduanService";
+import {getPengaduan,updatePengaduan,} from "../../services/pengaduanService";
 
 const EditPengaduan = () => {
 
@@ -41,12 +34,18 @@ const EditPengaduan = () => {
 
     }, [id]);
 
-    const handleSubmit = async (form) => {
-
-        await updatePengaduan(id, form);
-
-        navigate("/pengaduan");
-
+    const handleSubmit = async (formData) => {
+        try {
+            await updatePengaduan(id, formData);
+    
+            toast.success("Pengaduan berhasil diperbarui");
+    
+            navigate("/pengaduan");
+        } catch (err) {
+            console.log(err);
+    
+            toast.error("Gagal memperbarui pengaduan");
+        }
     };
 
     if (!data) return <MainLayout>Loading...</MainLayout>;
