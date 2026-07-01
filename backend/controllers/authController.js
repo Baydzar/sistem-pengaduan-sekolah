@@ -5,6 +5,10 @@ const jwt = require("jsonwebtoken");
 // Register
 exports.register = async (req, res) => {
   try {
+
+    console.log(User);
+    console.log(typeof User.findOne);
+    console.log(req.body);
     const { nama, email, password, role } = req.body;
 
     if (!nama || !email || !password) {
