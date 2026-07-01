@@ -13,9 +13,9 @@ const PengaduanSchema = new mongoose.Schema({
     trim: true
   },
   kategori: {
-    type: String,
-    required: [true, 'Kategori wajib dipilih'],
-    enum: ['Fasilitas', 'Kurikulum', 'Kesiswaan', 'Lainnya']
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Kategori",
+    required: true,
   },
   isi: {
     type: String,
