@@ -13,8 +13,9 @@ import {
 const Kategori = () => {
   const navigate = useNavigate();
 
-  const [kategori, setKategori] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [kategori, setKategori] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [keyword, setKeyword] = useState("");
 
   const loadData = async () => {
     try {
@@ -55,24 +56,41 @@ const Kategori = () => {
     <MainLayout>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-3xl font-bold">
-          Data Kategori
+            Data Kategori
         </h1>
 
-        <button
-          onClick={() => navigate("/kategori/tambah")}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Tambah
-        </button>
-      </div>
+            <div className="flex gap-3">
+
+                <input
+                type="text"
+                placeholder="Cari kategori..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="border rounded-lg px-4 py-2 w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <button
+                onClick={() => navigate("/kategori/tambah")}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                Tambah
+                </button>
+
+            </div>
+        </div>
 
       {loading ? (
         <Loading />
       ) : (
         <KategoriTable
-          data={kategori}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+            data={kategori.filter((item) => {
+                return (
+                item.nama.toLowerCase().includes(keyword.toLowerCase()) ||
+                item.deskripsi.toLowerCase().includes(keyword.toLowerCase())
+                );
+            })}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
         />
       )}
     </MainLayout>
