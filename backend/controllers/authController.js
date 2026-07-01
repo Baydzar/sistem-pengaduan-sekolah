@@ -9,7 +9,12 @@ exports.register = async (req, res) => {
     console.log(User);
     console.log(typeof User.findOne);
     console.log(req.body);
-    const { nama, email, password, role } = req.body;
+    const user = await User.create({
+      nama,
+      email,
+      password: hashPassword,
+      role: role || "siswa",
+    });
 
     if (!nama || !email || !password) {
       return res.status(400).json({
