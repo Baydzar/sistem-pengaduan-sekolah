@@ -1,15 +1,19 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/upload");
+const ctrl = require("../controllers/pengaduanController");
+const { protect, adminOnly } = require("../middleware/auth");
+const guruOrAdmin = (req, res, next) => {
+  if (req.user.role !== "admin" && req.user.role !== "guru")
+    return res.status(403).json({ message: "Akses ditolak" });
+  next();
+};
 
-const pengaduanController = require("../controllers/pengaduanController");
-const authMiddleware = require("../middleware/authMiddleware");
-
-// Semua route harus login
-router.use(authMiddleware);
-router.post("/", pengaduanController.createPengaduan);
-router.get("/", pengaduanController.getAllPengaduan);
-router.get("/:id", pengaduanController.getPengaduanById);
-router.put("/:id", pengaduanController.updatePengaduan);
-router.delete("/:id", pengaduanController.deletePengaduan);
+router.get("/dashboard/stats", protect, guruOrAdmin, ctrl.stats);
+router.get("/", protect, ctrl.getAll);
+router.get("/:id", protect, ctrl.getOne);
+router.post("/", protect, upload.single("gambar"), ctrl.create);
+router.put("/:id", protect, upload.single("gambar"), ctrl.update);
+router.delete("/:id", protect, ctrl.remove);
 
 module.exports = router;

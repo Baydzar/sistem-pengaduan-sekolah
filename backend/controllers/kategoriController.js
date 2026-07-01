@@ -1,103 +1,25 @@
 const Kategori = require("../models/Kategori");
 
-class KategoriController {
+exports.getAll = async (req, res, next) => {
+  try {
+    const data = await Kategori.find().sort({ createdAt: 1 });
+    res.json(data);
+  } catch (err) { next(err); }
+};
 
-    async getAll(req,res){
+exports.create = async (req, res, next) => {
+  try {
+    const { nama } = req.body;
+    const exists = await Kategori.findOne({ nama });
+    if (exists) return res.status(400).json({ message: "Kategori sudah ada" });
+    const data = await Kategori.create({ nama });
+    res.status(201).json(data);
+  } catch (err) { next(err); }
+};
 
-        try{
-
-            const data = await Kategori.find();
-
-            res.json({
-                success:true,
-                data
-            });
-
-        }catch(err){
-
-            res.status(500).json({
-                success:false,
-                message:err.message
-            });
-
-        }
-
-    }
-
-    async create(req,res){
-
-        try{
-
-            const kategori = await Kategori.create(req.body);
-
-            res.status(201).json({
-                success:true,
-                data:kategori
-            });
-
-        }catch(err){
-
-            res.status(500).json({
-                success:false,
-                message:err.message
-            });
-
-        }
-
-    }
-
-    async update(req,res){
-
-        try{
-
-            const kategori = await Kategori.findByIdAndUpdate(
-
-                req.params.id,
-
-                req.body,
-
-                {new:true}
-
-            );
-
-            res.json({
-                success:true,
-                data:kategori
-            });
-
-        }catch(err){
-
-            res.status(500).json({
-                success:false,
-                message:err.message
-            });
-
-        }
-
-    }
-
-    async delete(req,res){
-
-        try{
-
-            await Kategori.findByIdAndDelete(req.params.id);
-
-            res.json({
-                success:true,
-                message:"Kategori berhasil dihapus"
-            });
-
-        }catch(err){
-
-            res.status(500).json({
-                success:false,
-                message:err.message
-            });
-
-        }
-
-    }
-
-}
-
-module.exports = new KategoriController();
+exports.remove = async (req, res, next) => {
+  try {
+    await Kategori.findByIdAndDelete(req.params.id);
+    res.json({ message: "Kategori dihapus" });
+  } catch (err) { next(err); }
+};

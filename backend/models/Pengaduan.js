@@ -1,33 +1,33 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const PengaduanSchema = new mongoose.Schema({
-  // Relasi ke model User
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'User ID wajib diisi']
-  },
+const pengaduanSchema = new mongoose.Schema({
   judul: {
     type: String,
-    required: [true, 'Judul pengaduan tidak boleh kosong'],
-    trim: true
-  },
-  kategori: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Kategori",
     required: true,
   },
   isi: {
     type: String,
-    required: [true, 'Isi pengaduan tidak boleh kosong']
+    required: true,
+  },
+  kategori: {
+    type: String,
+    enum: ["fasilitas", "akademik", "bullying", "lainnya"],
+    required: true,
   },
   status: {
     type: String,
-    enum: ['Pending', 'Proses', 'Selesai'],
-    default: 'Pending'
+    enum: ["pending", "diproses", "selesai"],
+    default: "pending",
+  },
+  pelapor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  gambar: {
+    type: String,
+    default: null
   }
-}, {
-  timestamps: true // Otomatis membuat createdAt dan updatedAt
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Pengaduan', PengaduanSchema);
+module.exports = mongoose.model("Pengaduan", pengaduanSchema);

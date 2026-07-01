@@ -1,87 +1,102 @@
-const Pengaduan = require('../models/Pengaduan');
+const Pengaduan = require("../models/Pengaduan");
 
-class PengaduanController {
-  // 1. POST /data (Input Pengaduan Baru)
-  async createPengaduan(req, res) {
-    try {
-      const { user, judul, kategori, isi } = req.body;
+// GET /api/pengaduan
+exports.getAll = async (req, res, next) => {
+  try {
+    const filter = (req.user.role === "admin" || req.user.role === "guru") ? {} : { pelapor: req.user.id };
+    const { kategori, status, search } = req.query;
+    if (kategori) filter.kategori = kategori;
+    if (status) filter.status = status;
+    if (search) filter.judul = { $regex: search, $options: "i" };
 
-      // Validasi sederhana (Kriteria JavaScript Dasar & Backend)
-      if (!user || !judul || !kategori || !isi) {
-        return res.status(400).json({ message: 'Semua fields wajib diisi!' });
-      }
+    const data = await Pengaduan.find(filter).populate("pelapor", "name email").sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) { next(err); }
+};
 
-      // PERBAIKAN: Menghapus spasi pada nama variabel menjadi camelCase (pengaduanBaru)
-      const pengaduanBaru = await Pengaduan.create({ user, judul, kategori, isi });
-      
-      // PERBAIKAN: Mengembalikan variabel yang benar (pengaduanBaru)
-      res.status(201).json({ success: true, data: pengaduanBaru });
-    } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+// GET /api/pengaduan/:id
+exports.getOne = async (req, res, next) => {
+  try {
+    const data = await Pengaduan.findById(req.params.id).populate("pelapor", "name email");
+    if (!data) return res.status(404).json({ message: "Tidak ditemukan" });
+
+    // Cek otorisasi: siswa hanya bisa melihat pengaduan miliknya sendiri
+    if (req.user.role !== "admin" && req.user.role !== "guru" && data.pelapor._id.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Akses ditolak" });
     }
-  }
 
-  // 2. GET /data (Ambil Semua Data + Query Pencarian)
-  async getAllPengaduan(req, res) {
-    try {
-      const { search } = req.query;
-      let query = {};
+    res.json(data);
+  } catch (err) { next(err); }
+};
 
-      // Implementasi Query Pencarian (Kriteria Database)
-      if (search) {
-        query.judul = { $regex: search, $options: 'i' }; // 'i' artinya case-insensitive
+// POST /api/pengaduan
+exports.create = async (req, res, next) => {
+  try {
+    const { judul, isi, kategori } = req.body;
+    const gambar = req.file ? req.file.filename : null;
+    const data = await Pengaduan.create({ judul, isi, kategori, pelapor: req.user.id, gambar });
+    res.status(201).json(data);
+  } catch (err) { next(err); }
+};
+
+// PUT /api/pengaduan/:id
+exports.update = async (req, res, next) => {
+  try {
+    const data = await Pengaduan.findById(req.params.id);
+    if (!data) return res.status(404).json({ message: "Tidak ditemukan" });
+
+    if (req.user.role === "admin" || req.user.role === "guru") {
+      // Admin dan guru hanya diperbolehkan mengupdate status pengaduan
+      if (req.body.status !== undefined) {
+        data.status = req.body.status;
       }
-
-      // Memakai .populate('user', 'nama') jika ingin mengambil data user sekalian (Relasi)
-      const data = await Pengaduan.find(query).populate('user', 'nama'); 
-      res.status(200).json({ success: true, data });
-    } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-  }
-
-  // 3. GET /data/:id (Detail Pengaduan)
-  async getPengaduanById(req, res) {
-    try {
-      const pengaduan = await Pengaduan.findById(req.params.id);
-      if (!pengaduan) {
-        return res.status(404).json({ message: 'Data pengaduan tidak ditemukan' });
+    } else {
+      // Siswa hanya bisa mengupdate pengaduan miliknya sendiri
+      if (data.pelapor.toString() !== req.user.id) {
+        return res.status(403).json({ message: "Akses ditolak" });
       }
-      res.status(200).json({ success: true, data: pengaduan });
-    } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-  }
-
-  // 4. PUT /data/:id (Update Status/Isi Pengaduan)
-  async updatePengaduan(req, res) {
-    try {
-      const updatedData = await Pengaduan.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!updatedData) {
-        return res.status(404).json({ message: 'Data tidak ditemukan' });
+      // Siswa hanya bisa mengupdate jika status masih "pending"
+      if (data.status !== "pending") {
+        return res.status(400).json({ message: "Pengaduan yang sedang diproses atau selesai tidak dapat diubah" });
       }
-      res.status(200).json({ success: true, data: updatedData });
-    } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      // Siswa hanya bisa mengubah judul, isi, dan kategori
+      const { judul, isi, kategori } = req.body;
+      if (judul !== undefined) data.judul = judul;
+      if (isi !== undefined) data.isi = isi;
+      if (kategori !== undefined) data.kategori = kategori;
+      if (req.file) data.gambar = req.file.filename;
     }
-  }
 
-  // 5. DELETE /data/:id (Hapus Pengaduan)
-  async deletePengaduan(req, res) {
-    try {
-      const deleted = await Pengaduan.findByIdAndDelete(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: 'Data tidak ditemukan' });
-      }
-      res.status(200).json({ success: true, message: 'Pengaduan berhasil dihapus' });
-    } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-  }
-}
+    await data.save();
+    const updatedData = await Pengaduan.findById(data._id).populate("pelapor", "name email");
+    res.json(updatedData);
+  } catch (err) { next(err); }
+};
 
-module.exports = new PengaduanController();
+// DELETE /api/pengaduan/:id
+exports.remove = async (req, res, next) => {
+  try {
+    const data = await Pengaduan.findById(req.params.id);
+    if (!data) return res.status(404).json({ message: "Tidak ditemukan" });
+
+    if (req.user.role !== "admin" && data.pelapor.toString() !== req.user.id)
+      return res.status(403).json({ message: "Akses ditolak" });
+
+    if (req.user.role === "siswa" && data.status !== "pending")
+      return res.status(403).json({ message: "Hanya bisa hapus pengaduan berstatus pending" });
+
+    await Pengaduan.findByIdAndDelete(req.params.id);
+    res.json({ message: "Berhasil dihapus" });
+  } catch (err) { next(err); }
+};
+
+// GET /api/pengaduan/dashboard/stats
+exports.stats = async (req, res, next) => {
+  try {
+    const total = await Pengaduan.countDocuments();
+    const pending = await Pengaduan.countDocuments({ status: "pending" });
+    const diproses = await Pengaduan.countDocuments({ status: "diproses" });
+    const selesai = await Pengaduan.countDocuments({ status: "selesai" });
+    res.json({ total, pending, diproses, selesai });
+  } catch (err) { next(err); }
+};
