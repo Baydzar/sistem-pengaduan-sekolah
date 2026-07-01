@@ -8,6 +8,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 router.use(authMiddleware);
 router.post("/", pengaduanController.createPengaduan);
 router.get("/", pengaduanController.getAllPengaduan);
+router.get("/tracking/:id",pengaduanController.trackPengaduan);
 router.get("/:id", pengaduanController.getPengaduanById);
 router.put("/:id", pengaduanController.updatePengaduan);
 router.delete("/:id", pengaduanController.deletePengaduan);

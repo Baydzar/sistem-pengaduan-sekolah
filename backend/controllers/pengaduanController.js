@@ -1,87 +1,211 @@
-const Pengaduan = require('../models/Pengaduan');
+const Pengaduan = require("../models/Pengaduan");
 
 class PengaduanController {
-  // 1. POST /data (Input Pengaduan Baru)
+
+  // ==========================
+  // 1. Tambah Pengaduan
+  // ==========================
   async createPengaduan(req, res) {
     try {
-      const { user, judul, kategori, isi } = req.body;
+      const { judul, kategori, isi } = req.body;
 
-      // Validasi sederhana (Kriteria JavaScript Dasar & Backend)
-      if (!user || !judul || !kategori || !isi) {
-        return res.status(400).json({ message: 'Semua fields wajib diisi!' });
+      // Debug (boleh dihapus setelah selesai)
+      console.log("User Login :", req.user);
+      console.log("Body :", req.body);
+
+      // Validasi
+      if (!judul || !kategori || !isi) {
+        return res.status(400).json({
+          success: false,
+          message: "Semua field wajib diisi!",
+        });
       }
 
-      // PERBAIKAN: Menghapus spasi pada nama variabel menjadi camelCase (pengaduanBaru)
-      const pengaduanBaru = await Pengaduan.create({ user, judul, kategori, isi });
-      
-      // PERBAIKAN: Mengembalikan variabel yang benar (pengaduanBaru)
-      res.status(201).json({ success: true, data: pengaduanBaru });
+      // Simpan ke database
+      const pengaduanBaru = await Pengaduan.create({
+        user: req.user.id, // Ambil user dari JWT
+        judul,
+        kategori,
+        isi,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Pengaduan berhasil ditambahkan",
+        data: pengaduanBaru,
+      });
+
     } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  // 2. GET /data (Ambil Semua Data + Query Pencarian)
+  // ==========================
+  // 2. Ambil Semua Pengaduan
+  // ==========================
   async getAllPengaduan(req, res) {
     try {
       const { search } = req.query;
+
       let query = {};
 
-      // Implementasi Query Pencarian (Kriteria Database)
       if (search) {
-        query.judul = { $regex: search, $options: 'i' }; // 'i' artinya case-insensitive
+        query.judul = {
+          $regex: search,
+          $options: "i",
+        };
       }
 
-      // Memakai .populate('user', 'nama') jika ingin mengambil data user sekalian (Relasi)
-      const data = await Pengaduan.find(query).populate('user', 'nama'); 
-      res.status(200).json({ success: true, data });
+      const data = await Pengaduan.find(query)
+        .populate("user", "nama")
+        .populate("kategori", "nama")
+        .sort({
+          createdAt: -1,
+        });
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+
     } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  // 3. GET /data/:id (Detail Pengaduan)
+  // ==========================
+  // 3. Detail Pengaduan
+  // ==========================
   async getPengaduanById(req, res) {
     try {
-      const pengaduan = await Pengaduan.findById(req.params.id);
-      if (!pengaduan) {
-        return res.status(404).json({ message: 'Data pengaduan tidak ditemukan' });
+      const data = await Pengaduan.findById(req.params.id)
+        .populate("user", "nama")
+        .populate("kategori", "nama");
+
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengaduan tidak ditemukan",
+        });
       }
-      res.status(200).json({ success: true, data: pengaduan });
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+
     } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  // 4. PUT /data/:id (Update Status/Isi Pengaduan)
+  // ==========================
+  // 4. Update Pengaduan
+  // ==========================
   async updatePengaduan(req, res) {
     try {
-      const updatedData = await Pengaduan.findByIdAndUpdate(
+
+      const data = await Pengaduan.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true, runValidators: true }
+        {
+          new: true,
+          runValidators: true,
+        }
       );
-      if (!updatedData) {
-        return res.status(404).json({ message: 'Data tidak ditemukan' });
+
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengaduan tidak ditemukan",
+        });
       }
-      res.status(200).json({ success: true, data: updatedData });
+
+      return res.status(200).json({
+        success: true,
+        message: "Pengaduan berhasil diupdate",
+        data,
+      });
+
     } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
 
-  // 5. DELETE /data/:id (Hapus Pengaduan)
+  // ==========================
+  // 5. Hapus Pengaduan
+  // ==========================
   async deletePengaduan(req, res) {
     try {
-      const deleted = await Pengaduan.findByIdAndDelete(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: 'Data tidak ditemukan' });
+
+      const data = await Pengaduan.findByIdAndDelete(req.params.id);
+
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengaduan tidak ditemukan",
+        });
       }
-      res.status(200).json({ success: true, message: 'Pengaduan berhasil dihapus' });
+
+      return res.status(200).json({
+        success: true,
+        message: "Pengaduan berhasil dihapus",
+      });
+
     } catch (error) {
-      res.status(500).json({ message: 'Server Error', error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
   }
+
+  async trackPengaduan(req, res) {
+
+    try {
+  
+      const data = await Pengaduan.findById(
+        req.params.id
+      )
+        .populate("kategori", "nama")
+        .populate("user", "nama");
+  
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengaduan tidak ditemukan",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        data,
+      });
+  
+    } catch (error) {
+  
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+  
+    }
+  
+  }
+  
 }
+
 
 module.exports = new PengaduanController();
