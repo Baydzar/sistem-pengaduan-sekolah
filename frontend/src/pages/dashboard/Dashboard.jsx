@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import MainLayout from "../../layouts/MainLayout";
 import StatCard from "../../components/dashboard/StatCard";
 import StatusChart from "../../components/dashboard/StatusChart";
-
+import RecentComplaint from "../../components/dashboard/RecentComplaint";
+import WelcomeCard from "../../components/dashboard/WelcomeCard";
 import { getAllPengaduan } from "../../services/pengaduanService";
 import { getAllKategori } from "../../services/kategoriService";
 
@@ -16,9 +17,20 @@ const Dashboard = () => {
     kategori: 0,
   });
 
+  const [recent, setRecent] = useState([]);
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
+
     loadDashboard();
-  }, []);
+
+    const userLogin = JSON.parse(
+        localStorage.getItem("user")
+    );
+
+    setUser(userLogin);
+
+}, []);
 
   const loadDashboard = async () => {
     try {
@@ -27,6 +39,8 @@ const Dashboard = () => {
 
       const dataPengaduan = pengaduanRes.data;
       const dataKategori = kategoriRes.data;
+
+      setRecent(dataPengaduan.slice(0, 5));
 
       setStats({
         total: dataPengaduan.length,
@@ -49,6 +63,8 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
+
+    <WelcomeCard user={user} />
 
       <h1 className="text-3xl font-bold mb-6">
         Dashboard
@@ -89,6 +105,7 @@ const Dashboard = () => {
       </div>
 
       <StatusChart stats={stats} />
+      <RecentComplaint data={recent} />
 
     </MainLayout>
   );

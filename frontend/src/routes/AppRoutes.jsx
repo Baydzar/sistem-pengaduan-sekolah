@@ -5,9 +5,12 @@ import ProtectedRoute from "../components/common/ProtectedRoute";
 import Pengaduan from "../pages/pengaduan/Pengaduan";
 import TambahPengaduan from "../pages/pengaduan/TambahPengaduan";
 import EditPengaduan from "../pages/pengaduan/EditPengaduan";
+import DetailPengaduan from "../pages/pengaduan/DetailPengaduan";
+import Tracking from "../pages/tracking/Tracking";
 import Kategori from "../pages/kategori/Kategori";
 import TambahKategori from "../pages/kategori/TambahKategori";
 import EditKategori from "../pages/kategori/EditKategori";
+
 
 const AppRoutes = () => {
   return (
@@ -88,6 +91,25 @@ const AppRoutes = () => {
             </ProtectedRoute>
         }
         />
+
+      {/* Detail Pengaduan */}
+      <Route
+        path="/pengaduan/detail/:id"
+        element={
+          <ProtectedRoute>
+            <DetailPengaduan />
+          </ProtectedRoute>
+        }
+      />
+      {/* Tracking */}
+      <Route
+        path="/tracking"
+        element={
+          <ProtectedRoute>
+            <Tracking />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };

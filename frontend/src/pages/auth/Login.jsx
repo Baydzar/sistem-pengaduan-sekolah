@@ -29,11 +29,18 @@ const Login = () => {
 
       const res = await login(form.email, form.password);
 
-      saveToken(res.token);
+        // Simpan token
+        saveToken(res.token);
 
-      alert("Login berhasil");
+        // Simpan data user
+        localStorage.setItem(
+        "user",
+        JSON.stringify(res.user)
+        );
 
-      navigate("/dashboard");
+        alert("Login berhasil");
+
+        navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login gagal");
     } finally {

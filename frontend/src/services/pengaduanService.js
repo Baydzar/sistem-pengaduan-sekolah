@@ -24,3 +24,11 @@ export const deletePengaduan = async (id) => {
   const res = await api.delete(`/pengaduan/${id}`);
   return res.data;
 };
+
+export const trackPengaduan = async (id) => {
+    const res = await api.get(
+      `/pengaduan/tracking/${id}`
+    );
+  
+    return res.data;
+  };
