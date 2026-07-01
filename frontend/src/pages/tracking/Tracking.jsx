@@ -100,7 +100,13 @@ const Tracking = () => {
             </div>
           )
         }
-        <TrackingTimeline status={data.status}/>
+        {
+        data && (
+            <TrackingTimeline
+            status={data.status}
+            />
+        )
+        }
       </div>
 
     </MainLayout>
