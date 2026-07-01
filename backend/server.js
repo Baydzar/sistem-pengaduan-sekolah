@@ -6,6 +6,7 @@ const pengaduanController = require('./controllers/pengaduanController');
 const authRoutes = require("./routes/authRoutes");
 const pengaduanRoutes = require("./routes/pengaduanRoutes");
 const kategoriRoutes = require("./routes/kategoriRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -20,8 +21,8 @@ app.use(express.json()); // Supaya express bisa membaca req.body berupa JSON
 // Pemetaan Routing REST API Langsung sesuai spesifikasi minimum:
 app.use("/api/auth", authRoutes);
 app.use("/api/pengaduan", pengaduanRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/kategori", kategoriRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.get('/api/data/:id', (req, res) => pengaduanController.getPengaduanById(req, res));
 app.put('/api/data/:id', (req, res) => pengaduanController.updatePengaduan(req, res));
 app.delete('/api/data/:id', (req, res) => pengaduanController.deletePengaduan(req, res));
