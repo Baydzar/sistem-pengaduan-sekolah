@@ -1,25 +1,38 @@
 const Pengaduan = require("../models/Pengaduan");
+const Kategori = require("../models/Kategori");
 
 exports.getDashboard = async (req, res) => {
   try {
+    let filter = {};
+
+    if (req.user.role === "siswa") {
+      filter.user = req.user.id;
+    }
+
     // Total seluruh pengaduan
-    const totalPengaduan = await Pengaduan.countDocuments();
+    const totalPengaduan = await Pengaduan.countDocuments(filter);
+
+    // Total seluruh kategori
+    const totalKategori = await Kategori.countDocuments();
 
     // Total berdasarkan status
     const pending = await Pengaduan.countDocuments({
-      status: "Pending",
+      ...filter,
+      status: "pending",
     });
 
     const proses = await Pengaduan.countDocuments({
-      status: "Proses",
+      ...filter,
+      status: "proses",
     });
 
     const selesai = await Pengaduan.countDocuments({
-      status: "Selesai",
+      ...filter,
+      status: "selesai",
     });
 
     // 5 Pengaduan terbaru
-    const pengaduanTerbaru = await Pengaduan.find()
+    const pengaduanTerbaru = await Pengaduan.find(filter)
       .populate("user", "nama")
       .populate("kategori", "nama")
       .sort({ createdAt: -1 })
@@ -27,6 +40,9 @@ exports.getDashboard = async (req, res) => {
 
     // Statistik kategori
     const kategoriStatistik = await Pengaduan.aggregate([
+      {
+        $match: filter.user ? { user: filter.user } : {},
+      },
       {
         $group: {
           _id: "$kategori",
@@ -67,6 +83,7 @@ exports.getDashboard = async (req, res) => {
         pending,
         proses,
         selesai,
+        totalKategori,
         kategoriStatistik,
         pengaduanTerbaru,
       },

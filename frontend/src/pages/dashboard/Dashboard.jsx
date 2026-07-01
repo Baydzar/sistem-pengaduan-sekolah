@@ -5,8 +5,7 @@ import StatCard from "../../components/dashboard/StatCard";
 import StatusChart from "../../components/dashboard/StatusChart";
 import RecentComplaint from "../../components/dashboard/RecentComplaint";
 import WelcomeCard from "../../components/dashboard/WelcomeCard";
-import { getAllPengaduan } from "../../services/pengaduanService";
-import { getAllKategori } from "../../services/kategoriService";
+import { getDashboardStats } from "../../services/dashboardService";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -34,28 +33,19 @@ const Dashboard = () => {
 
   const loadDashboard = async () => {
     try {
-      const pengaduanRes = await getAllPengaduan();
-      const kategoriRes = await getAllKategori();
-
-      const dataPengaduan = pengaduanRes.data;
-      const dataKategori = kategoriRes.data;
-
-      setRecent(dataPengaduan.slice(0, 5));
-
+      const res = await getDashboardStats();
+      const { totalPengaduan, pending, proses, selesai, totalKategori, pengaduanTerbaru } = res.data;
+  
+      setRecent(pengaduanTerbaru);
+  
       setStats({
-        total: dataPengaduan.length,
-        pending: dataPengaduan.filter(
-          (item) => item.status === "pending"
-        ).length,
-        proses: dataPengaduan.filter(
-          (item) => item.status === "proses"
-        ).length,
-        selesai: dataPengaduan.filter(
-          (item) => item.status === "selesai"
-        ).length,
-        kategori: dataKategori.length,
+        total: totalPengaduan,
+        pending: pending,
+        proses: proses,
+        selesai: selesai,
+        kategori: totalKategori,
       });
-
+  
     } catch (err) {
       console.log(err);
     }
