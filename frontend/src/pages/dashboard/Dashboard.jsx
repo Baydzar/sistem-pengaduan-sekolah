@@ -1,57 +1,22 @@
 import MainLayout from "../../layouts/MainLayout";
+import StatCard from "../../components/dashboard/StatCard";
+import StatusChart from "../../components/dashboard/StatusChart";
 
 const Dashboard = () => {
   return (
     <MainLayout>
-
-      <h2 className="text-3xl font-bold mb-6">
+      <h1 className="text-3xl font-bold mb-6">
         Dashboard
-      </h2>
+      </h1>
 
-      <div className="grid grid-cols-4 gap-5">
-
-        <div className="bg-white rounded-xl shadow p-6">
-
-          <h3>Total Pengaduan</h3>
-
-          <p className="text-3xl font-bold mt-3">
-            0
-          </p>
-
-        </div>
-
-        <div className="bg-yellow-100 rounded-xl shadow p-6">
-
-          <h3>Pending</h3>
-
-          <p className="text-3xl font-bold mt-3">
-            0
-          </p>
-
-        </div>
-
-        <div className="bg-blue-100 rounded-xl shadow p-6">
-
-          <h3>Proses</h3>
-
-          <p className="text-3xl font-bold mt-3">
-            0
-          </p>
-
-        </div>
-
-        <div className="bg-green-100 rounded-xl shadow p-6">
-
-          <h3>Selesai</h3>
-
-          <p className="text-3xl font-bold mt-3">
-            0
-          </p>
-
-        </div>
-
+      <div className="grid md:grid-cols-4 gap-5 mb-8">
+        <StatCard title="Total Pengaduan" total={25} color="blue" />
+        <StatCard title="Pending" total={5} color="yellow" />
+        <StatCard title="Proses" total={10} color="red" />
+        <StatCard title="Selesai" total={10} color="green" />
       </div>
 
+      <StatusChart />
     </MainLayout>
   );
 };
