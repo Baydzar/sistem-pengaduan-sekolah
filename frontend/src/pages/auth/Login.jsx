@@ -1,6 +1,6 @@
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { login } from "../../services/authService";
 import { saveToken } from "../../utils/storage";
 
@@ -38,11 +38,14 @@ const Login = () => {
         JSON.stringify(res.user)
         );
 
-        alert("Login berhasil");
+        toast.success("Login berhasil");
 
         navigate("/dashboard");
     } catch (err) {
-      alert(err.response?.data?.message || "Login gagal");
+        toast.error(
+            err.response?.data?.message ||
+            "Login gagal"
+          );
     } finally {
       setLoading(false);
     }

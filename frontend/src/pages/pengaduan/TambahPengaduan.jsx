@@ -7,31 +7,21 @@ import { createPengaduan } from "../../services/pengaduanService";
 import api from "../../services/api";
 
 const TambahPengaduan = () => {
-
     const navigate = useNavigate();
-
     const [kategori, setKategori] = useState([]);
 
     useEffect(() => {
-
         const loadKategori = async () => {
-
             const res = await api.get("/kategori");
-
             setKategori(res.data.data);
-
         };
-
         loadKategori();
-
     }, []);
 
     const handleSubmit = async (formData) => {
         try {
             await createPengaduan(formData);
-    
             toast.success("Pengaduan berhasil ditambahkan");
-    
             navigate("/pengaduan");
         } catch (err) {
             console.log("Status :", err.response.status);
@@ -42,25 +32,16 @@ const TambahPengaduan = () => {
     };
 
     return (
-
         <MainLayout>
-
             <h1 className="text-3xl font-bold mb-5">
-
                 Tambah Pengaduan
-
             </h1>
 
             <PengaduanForm
-
                 kategori={kategori}
-
                 onSubmit={handleSubmit}
-
             />
-
         </MainLayout>
-
     );
 
 };
