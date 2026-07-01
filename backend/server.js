@@ -25,10 +25,6 @@ app.use("/api/pengaduan", pengaduanRoutes);
 app.use("/api/kategori", kategoriRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.get('/api/data/:id', (req, res) => pengaduanController.getPengaduanById(req, res));
-app.put('/api/data/:id', (req, res) => pengaduanController.updatePengaduan(req, res));
-app.delete('/api/data/:id', (req, res) => pengaduanController.deletePengaduan(req, res));
-
 // Jalankan Server
 const PORT = process.env.PORT || 5000;
 // Tambahkan ini di server.js untuk test halaman utama

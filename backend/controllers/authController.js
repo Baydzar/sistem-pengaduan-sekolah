@@ -2,19 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// Register
 exports.register = async (req, res) => {
   try {
-
-    console.log(User);
-    console.log(typeof User.findOne);
-    console.log(req.body);
-    const user = await User.create({
-      nama,
-      email,
-      password: hashPassword,
-      role: role || "siswa",
-    });
+    const { nama, email, password, role } = req.body;
 
     if (!nama || !email || !password) {
       return res.status(400).json({
@@ -23,16 +13,22 @@ exports.register = async (req, res) => {
       });
     }
 
-    const cekUser = await User.findOne({ email });
-
-    if (cekUser) {
+    const exist = await User.findOne({ email });
+    if (exist) {
       return res.status(400).json({
         success: false,
-        message: "Email sudah digunakan",
+        message: "Email sudah terdaftar",
       });
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      nama,
+      email,
+      password: hashedPassword,
+      role: role || "siswa",
+    });
 
     res.status(201).json({
       success: true,
@@ -47,9 +43,9 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login
 exports.login = async (req, res) => {
   try {
+
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
@@ -61,7 +57,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    const cocok = await bcrypt.compare(password, user.password);
+    const cocok = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!cocok) {
       return res.status(401).json({
@@ -91,10 +90,13 @@ exports.login = async (req, res) => {
         role: user.role,
       },
     });
+
   } catch (err) {
+
     res.status(500).json({
       success: false,
       message: err.message,
     });
+
   }
 };
