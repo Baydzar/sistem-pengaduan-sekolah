@@ -1,6 +1,42 @@
 import {FaCheckCircle,FaClock,FaSpinner,} from "react-icons/fa";
 
+
+
 const PengaduanTable = ({ data, onEdit, onDelete }) => {
+const user = JSON.parse(localStorage.getItem("user"));
+
+const canEdit = (item) => {
+
+  if (user.role === "admin")
+    return true;
+
+  if (user.role === "guru")
+    return true;
+
+  if (
+    user.role === "siswa" &&
+    item.user?._id === user.id
+  )
+    return true;
+
+  return false;
+};
+
+const canDelete = (item) => {
+
+  if (user.role === "admin")
+    return true;
+
+  if (
+    user.role === "siswa" &&
+    item.user === user.id &&
+    item.status === "pending"
+  )
+    return true;
+
+  return false;
+};
+
     return (
       <div className="bg-white rounded-lg shadow p-5 overflow-x-auto">
         <table className="w-full border-collapse">
@@ -41,9 +77,9 @@ const PengaduanTable = ({ data, onEdit, onDelete }) => {
                             : "bg-green-500"
                         }`}
                     >
-                        {item.status === "Pending" && <FaClock />}
-                        {item.status === "Proses" && <FaSpinner />}
-                        {item.status === "Selesai" && <FaCheckCircle />}
+                        {item.status === "pending" && <FaClock />}
+                        {item.status === "proses" && <FaSpinner />}
+                        {item.status === "selesai" && <FaCheckCircle />}
 
                         {item.status}
                     </span>
@@ -54,19 +90,27 @@ const PengaduanTable = ({ data, onEdit, onDelete }) => {
                   </td>
   
                   <td className="p-3 flex gap-2 justify-center">
-                    <button
-                      onClick={() => onEdit(item)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
+                    {
+                    canEdit(item) && (
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                      >
+                        Edit
+                      </button>
+                    )
+                  }
   
-                    <button
-                      onClick={() => onDelete(item._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      Hapus
-                    </button>
+                    {
+                    canDelete(item) && (
+                      <button
+                        onClick={() => onDelete(item._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded"
+                      >
+                        Hapus
+                      </button>
+                    )
+                  }
                   </td>
                 </tr>
               ))

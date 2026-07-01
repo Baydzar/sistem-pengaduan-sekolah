@@ -7,6 +7,12 @@ class PengaduanController {
   // ==========================
   async createPengaduan(req, res) {
     try {
+      if (req.user.role !== "siswa") {
+        return res.status(403).json({
+          success:false,
+          message:"Hanya siswa yang dapat membuat pengaduan"
+        });
+      }
       const { judul, kategori, isi } = req.body;
 
       // Debug (boleh dihapus setelah selesai)
@@ -48,37 +54,83 @@ class PengaduanController {
   // ==========================
   async getAllPengaduan(req, res) {
     try {
-      const { search } = req.query;
-
+      const { search, status, kategori, page, limit, startDate, endDate } = req.query;
+  
       let query = {};
-
+  
+      if (req.user.role === "siswa") {
+        query.user = req.user.id;
+      }
+  
       if (search) {
         query.judul = {
           $regex: search,
           $options: "i",
         };
       }
-
-      const data = await Pengaduan.find(query)
-        .populate("user", "nama")
-        .populate("kategori", "nama")
-        .sort({
-          createdAt: -1,
-        });
-
-      return res.status(200).json({
+  
+      if (status) {
+        query.status = status;
+      }
+  
+      if (kategori) {
+        query.kategori = kategori;
+      }
+  
+      if (startDate && endDate) {
+        query.createdAt = {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate + "T23:59:59.999Z"),
+        };
+      } else if (startDate) {
+        query.createdAt = { $gte: new Date(startDate) };
+      } else if (endDate) {
+        query.createdAt = { $lte: new Date(endDate + "T23:59:59.999Z") };
+      }
+  
+      let data;
+      let pagination = null;
+  
+      if (page || limit) {
+        const p = parseInt(page) || 1;
+        const l = parseInt(limit) || 10;
+        const skip = (p - 1) * l;
+        const totalItems = await Pengaduan.countDocuments(query);
+        const totalPages = Math.ceil(totalItems / l);
+  
+        data = await Pengaduan.find(query)
+          .populate("user", "nama role")
+          .populate("kategori")
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(l);
+  
+        pagination = {
+          totalItems,
+          totalPages,
+          currentPage: p,
+          limit: l,
+        };
+      } else {
+        data = await Pengaduan.find(query)
+          .populate("user", "nama role")
+          .populate("kategori")
+          .sort({ createdAt: -1 });
+      }
+  
+      res.json({
         success: true,
         data,
+        pagination,
       });
-
-    } catch (error) {
-      return res.status(500).json({
+  
+    } catch (err) {
+      res.status(500).json({
         success: false,
-        message: error.message,
+        message: err.message,
       });
     }
   }
-
   // ==========================
   // 3. Detail Pengaduan
   // ==========================
@@ -112,64 +164,152 @@ class PengaduanController {
   // 4. Update Pengaduan
   // ==========================
   async updatePengaduan(req, res) {
-    try {
 
-      const data = await Pengaduan.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
+    try{
+   
+      const pengaduan = await Pengaduan.findById(
+         req.params.id
       );
-
-      if (!data) {
-        return res.status(404).json({
-          success: false,
-          message: "Pengaduan tidak ditemukan",
-        });
+   
+      if(!pengaduan){
+         return res.status(404).json({
+            success:false,
+            message:"Data tidak ditemukan"
+         });
       }
-
-      return res.status(200).json({
-        success: true,
-        message: "Pengaduan berhasil diupdate",
-        data,
+   
+      // ====================
+      // SISWA
+      // ====================
+   
+      if(req.user.role === "siswa"){
+   
+         if(
+            pengaduan.user.toString() !==
+            req.user.id
+         ){
+            return res.status(403).json({
+               success:false,
+               message:"Bukan pengaduan milik anda"
+            });
+         }
+   
+         if(pengaduan.status !== "pending"){
+            return res.status(403).json({
+               success:false,
+               message:"Pengaduan sudah diproses"
+            });
+         }
+   
+         pengaduan.judul = req.body.judul;
+         pengaduan.isi = req.body.isi;
+         pengaduan.kategori = req.body.kategori;
+   
+      }
+   
+      // ====================
+      // GURU / ADMIN
+      // ====================
+   
+      if(
+         req.user.role === "guru" ||
+         req.user.role === "admin"
+      ){
+         pengaduan.status = req.body.status;
+      }
+   
+      await pengaduan.save();
+   
+      res.json({
+         success:true,
+         data:pengaduan
       });
-
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
+   
+    }catch(err){
+   
+      res.status(500).json({
+         success:false,
+         message:err.message
       });
+   
     }
-  }
+   
+   };
 
   // ==========================
   // 5. Hapus Pengaduan
   // ==========================
   async deletePengaduan(req, res) {
+
     try {
-
-      const data = await Pengaduan.findByIdAndDelete(req.params.id);
-
-      if (!data) {
+  
+      const pengaduan =
+        await Pengaduan.findById(req.params.id);
+  
+      if (!pengaduan) {
         return res.status(404).json({
           success: false,
-          message: "Pengaduan tidak ditemukan",
+          message: "Data tidak ditemukan"
         });
       }
-
-      return res.status(200).json({
-        success: true,
-        message: "Pengaduan berhasil dihapus",
-      });
-
-    } catch (error) {
-      return res.status(500).json({
+  
+      // ADMIN
+      if (req.user.role === "admin") {
+  
+        await pengaduan.deleteOne();
+  
+        return res.json({
+          success: true,
+          message: "Berhasil dihapus"
+        });
+  
+      }
+  
+      // SISWA
+      if (req.user.role === "siswa") {
+  
+        if (
+          pengaduan.user.toString() !==
+          req.user.id
+        ) {
+          return res.status(403).json({
+            success: false,
+            message: "Bukan milik anda"
+          });
+        }
+  
+        if (
+          pengaduan.status !== "pending"
+        ) {
+          return res.status(403).json({
+            success: false,
+            message: "Sudah diproses"
+          });
+        }
+  
+        await pengaduan.deleteOne();
+  
+        return res.json({
+          success: true,
+          message: "Berhasil dihapus"
+        });
+  
+      }
+  
+      return res.status(403).json({
         success: false,
-        message: error.message,
+        message: "Tidak memiliki akses"
       });
+  
+    } catch (err) {
+  
+      res.status(500).json({
+        success: false,
+        message: err.message
+      });
+  
     }
+  
   }
 
   async trackPengaduan(req, res) {

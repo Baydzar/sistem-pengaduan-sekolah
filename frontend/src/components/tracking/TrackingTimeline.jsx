@@ -1,9 +1,9 @@
 const TrackingTimeline = ({ status }) => {
 
     const steps = [
-      "Pending",
-      "Proses",
-      "Selesai",
+      "pending",
+      "proses",
+      "selesai",
     ];
   
     const currentIndex =

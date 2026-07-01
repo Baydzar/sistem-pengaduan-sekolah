@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import MainLayout from "../../layouts/MainLayout";
 
@@ -28,21 +29,19 @@ const User = () => {
 
   }, []);
 
-  const handleDelete =
-    async (id) => {
-
-      const yakin =
-        window.confirm(
-          "Hapus user?"
-        );
-
-      if (!yakin) return;
-
+  const handleDelete = async (id) => {
+    const yakin = window.confirm("Hapus user?");
+    if (!yakin) return;
+  
+    try {
       await deleteUser(id);
-
+      toast.success("User berhasil dihapus");
       loadData();
-
-    };
+    } catch (err) {
+      toast.error("Gagal menghapus user");
+      console.error(err);
+    }
+  };
 
   return (
 
