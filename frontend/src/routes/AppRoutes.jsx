@@ -11,6 +11,8 @@ import Tracking from "../pages/tracking/Tracking";
 import Kategori from "../pages/kategori/Kategori";
 import TambahKategori from "../pages/kategori/TambahKategori";
 import EditKategori from "../pages/kategori/EditKategori";
+import User from "../pages/user/User";
+import AdminRoute from "../components/common/AdminRoute";
 
 
 const AppRoutes = () => {
@@ -105,6 +107,18 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Tracking />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* User (Admin Only) */}
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <AdminRoute>
+              <User />
+            </AdminRoute>
           </ProtectedRoute>
         }
       />

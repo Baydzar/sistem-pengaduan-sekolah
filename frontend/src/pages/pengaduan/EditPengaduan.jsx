@@ -42,7 +42,8 @@ const EditPengaduan = () => {
     
             navigate("/pengaduan");
         } catch (err) {
-            console.log(err);
+            console.log("STATUS:", err.response?.status);
+            console.log("DATA:", err.response?.data);
     
             toast.error("Gagal memperbarui pengaduan");
         }

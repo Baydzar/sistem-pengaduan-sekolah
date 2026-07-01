@@ -23,8 +23,8 @@ const PengaduanSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Proses', 'Selesai'],
-    default: 'Pending'
+    enum: ['pending', 'proses', 'selesai'],
+    default: 'pending'
   }
 }, {
   timestamps: true // Otomatis membuat createdAt dan updatedAt

@@ -10,6 +10,7 @@ const PengaduanForm = ({
     judul: initialData?.judul || "",
     isi: initialData?.isi || "",
     kategori: initialData?.kategori?._id || "",
+    status: initialData?.status || "pending",
   });
 
   const handleChange = (e) => {
@@ -70,6 +71,31 @@ const PengaduanForm = ({
           ))}
         </select>
       </div>
+
+      <div>
+          <label className="block mb-2">
+            Status
+          </label>
+
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border rounded p-3"
+          >
+            <option value="pending">
+              Pending
+            </option>
+
+            <option value="proses">
+              Proses
+            </option>
+
+            <option value="selesai">
+              Selesai
+            </option>
+          </select>
+        </div>
 
       <div>
         <label className="block mb-2">

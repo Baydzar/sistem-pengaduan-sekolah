@@ -45,13 +45,13 @@ const Dashboard = () => {
       setStats({
         total: dataPengaduan.length,
         pending: dataPengaduan.filter(
-          (item) => item.status === "Pending"
+          (item) => item.status === "pending"
         ).length,
         proses: dataPengaduan.filter(
-          (item) => item.status === "Proses"
+          (item) => item.status === "proses"
         ).length,
         selesai: dataPengaduan.filter(
-          (item) => item.status === "Selesai"
+          (item) => item.status === "selesai"
         ).length,
         kategori: dataKategori.length,
       });

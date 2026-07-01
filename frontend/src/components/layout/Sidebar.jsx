@@ -6,10 +6,15 @@ import {
   FaList,
   FaSearch,
   FaSignOutAlt,
+  FaUsers,
 } from "react-icons/fa";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
 
   const menu = [
     {
@@ -17,16 +22,29 @@ const Sidebar = () => {
       icon: <FaHome />,
       path: "/dashboard",
     },
+
     {
       name: "Pengaduan",
       icon: <FaClipboardList />,
       path: "/pengaduan",
     },
-    {
-      name: "Kategori",
-      icon: <FaList />,
-      path: "/kategori",
-    },
+
+    ...(user?.role === "admin"
+      ? [
+          {
+            name: "Kategori",
+            icon: <FaList />,
+            path: "/kategori",
+          },
+
+          {
+            name: "Pengguna",
+            icon: <FaUsers />,
+            path: "/users",
+          },
+        ]
+      : []),
+
     {
       name: "Tracking",
       icon: <FaSearch />,
@@ -35,7 +53,15 @@ const Sidebar = () => {
   ];
 
   const handleLogout = () => {
+    const yakin = window.confirm(
+      "Yakin ingin logout?"
+    );
+
+    if (!yakin) return;
+
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
     navigate("/login");
   };
 
@@ -47,9 +73,19 @@ const Sidebar = () => {
         SIP Sekolah
       </div>
 
+      {/* User Info */}
+      <div className="p-4 border-b">
+        <p className="font-semibold">
+          {user?.nama}
+        </p>
+
+        <p className="text-sm text-gray-500 capitalize">
+          {user?.role}
+        </p>
+      </div>
+
       {/* Menu */}
       <ul className="flex-1">
-
         {menu.map((item) => (
           <li key={item.name}>
             <NavLink
@@ -67,7 +103,6 @@ const Sidebar = () => {
             </NavLink>
           </li>
         ))}
-
       </ul>
 
       {/* Logout */}
@@ -80,7 +115,6 @@ const Sidebar = () => {
           Logout
         </button>
       </div>
-
     </aside>
   );
 };
