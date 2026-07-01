@@ -34,7 +34,8 @@ const TambahPengaduan = () => {
     
             navigate("/pengaduan");
         } catch (err) {
-            console.log(err);
+            console.log("Status :", err.response.status);
+            console.log("Response :", err.response.data);
     
             toast.error("Gagal menambahkan pengaduan");
         }
