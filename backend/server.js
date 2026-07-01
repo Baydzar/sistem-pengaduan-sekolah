@@ -7,7 +7,8 @@ const authRoutes = require("./routes/authRoutes");
 const pengaduanRoutes = require("./routes/pengaduanRoutes");
 const kategoriRoutes = require("./routes/kategoriRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
-
+const userRoutes =
+require("./routes/userRoutes");
 const app = express();
 
 // Hubungkan ke MongoDB Atlas
@@ -22,6 +23,7 @@ app.use(express.json()); // Supaya express bisa membaca req.body berupa JSON
 app.use("/api/auth", authRoutes);
 app.use("/api/pengaduan", pengaduanRoutes);
 app.use("/api/kategori", kategoriRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.get('/api/data/:id', (req, res) => pengaduanController.getPengaduanById(req, res));
 app.put('/api/data/:id', (req, res) => pengaduanController.updatePengaduan(req, res));

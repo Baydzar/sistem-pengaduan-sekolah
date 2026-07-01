@@ -34,13 +34,6 @@ exports.register = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-      nama,
-      email,
-      password: hashPassword,
-      role,
-    });
-
     res.status(201).json({
       success: true,
       message: "Registrasi berhasil",
