@@ -1,0 +1,92 @@
+import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
+import api from "../services/api";
+import { useToast } from "../hooks/useToast";
+import Toast from "../components/Toast";
+
+export default function KelolaKategori() {
+  const [kategori, setKategori] = useState([]);
+  const [nama, setNama] = useState("");
+  const [error, setError] = useState(null);
+  const { toast, showToast, hideToast } = useToast();
+
+  const fetchKategori = async () => {
+    const res = await api.get("/kategori");
+    setKategori(res.data);
+  };
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await api.post("/kategori", { nama });
+      setKategori([...kategori, res.data]);
+      setNama("");
+      showToast("Kategori berhasil ditambahkan!");
+    } catch (err) {
+      setError(err.response?.data?.message || "Gagal menambah kategori");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Yakin hapus kategori ini?")) return;
+    await api.delete(`/kategori/${id}`);
+    setKategori(kategori.filter(k => k._id !== id));
+    showToast("Kategori dihapus!", "error");
+  };
+
+  useEffect(() => { fetchKategori(); }, []);
+
+  return (
+    <div className="page-wrap">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      <header className="page-head">
+        <div>
+          <p className="page-kicker">Taksonomi laporan</p>
+          <h1 className="page-title">Kelola Kategori</h1>
+          <p className="page-subtitle">Susun kategori agar laporan mudah diarahkan ke penanggung jawab.</p>
+        </div>
+      </header>
+
+      {/* Form tambah */}
+      <form onSubmit={handleAdd} className="panel p-4 mb-6 flex flex-col sm:flex-row gap-2 max-w-lg">
+        <input type="text" value={nama} onChange={(e) => setNama(e.target.value)}
+          placeholder="Nama kategori baru..." required
+          className="field flex-1" />
+        <button type="submit" className="btn btn-primary">
+          Tambah
+        </button>
+      </form>
+      {error && <p className="alert alert-error mb-4">{error}</p>}
+
+      {/* Daftar kategori */}
+      <div className="panel table-wrap max-w-lg">
+        <table className="data-table !min-w-0">
+          <thead>
+            <tr>
+              <th>Nama Kategori</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kategori.length === 0 && (
+              <tr><td colSpan={2} className="text-center text-[color:var(--color-muted)]">Belum ada kategori</td></tr>
+            )}
+            {kategori.map((k) => (
+              <tr key={k._id}>
+                <td className="capitalize">{k.nama}</td>
+                <td>
+                  <button onClick={() => handleDelete(k._id)}
+                    className="icon-btn icon-btn-danger"
+                    title="Hapus">
+                    <Trash2 size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
