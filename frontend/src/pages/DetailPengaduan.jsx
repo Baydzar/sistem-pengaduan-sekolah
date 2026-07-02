@@ -34,7 +34,7 @@ export default function DetailPengaduan() {
         Kembali
       </button>
 
-      <div className="panel p-6">
+      <div className="panel p-8">
         <p className="page-kicker">Detail laporan</p>
         <h1 className="page-title mb-4">{data.judul}</h1>
 

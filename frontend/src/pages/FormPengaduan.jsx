@@ -56,7 +56,7 @@ export default function FormPengaduan() {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="panel p-6 page-wrap-narrow form-grid">
+      <form onSubmit={handleSubmit} className="panel p-8 page-wrap-narrow form-grid">
         {error && <p className="alert alert-error mb-4">{error}</p>}
 
         <div>
